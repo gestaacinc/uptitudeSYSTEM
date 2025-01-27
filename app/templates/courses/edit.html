@@ -1,0 +1,100 @@
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCourseModalLabel">Edit Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editCourseForm" action="{{ url_for('courses.update') }}" method="POST">
+                <input type="hidden" id="edit-course-id" name="id">
+                <div class="modal-body">
+                    <!-- Course Name -->
+                    <div class="mb-3">
+                        <label for="edit-name" class="form-label">Course Name</label>
+                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    </div>
+
+                    <!-- TESDA Qualification -->
+                    <div class="mb-3">
+                        <label for="edit-tesda_level" class="form-label">TESDA Qualification</label>
+                        <select class="form-select" id="edit-tesda_level" name="tesda_level" required>
+                            <option value="">Select a Qualification</option>
+                            <option value="NC I">NC I</option>
+                            <option value="NC II">NC II</option>
+                            <option value="NC III">NC III</option>
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-3">
+                        <label for="edit-duration_days" class="form-label">Duration (Days)</label>
+                        <input type="number" class="form-control" id="edit-duration_days" name="duration_days" required>
+                    </div>
+
+                    <!-- Training Fee -->
+                    <div class="mb-3">
+                        <label for="edit-training_fee" class="form-label">Training Fee</label>
+                        <input type="number" step="0.01" class="form-control" id="edit-training_fee" name="training_fee"
+                            required>
+                    </div>
+
+                    <!-- In-House Assessment -->
+                    <div class="mb-3">
+                        <label for="edit-assessment" class="form-label">Available for In-House Assessment?</label>
+                        <select class="form-select" id="edit-assessment" name="assessment"
+                            onchange="toggleEditAssessmentFee(this.value)" required>
+                            <option value="" selected>No Selection</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="edit-assessmentFeeField" style="display: none;">
+                        <label for="edit-assessment_fee" class="form-label">Assessment Fee</label>
+                        <input type="number" step="0.01" class="form-control" id="edit-assessment_fee"
+                            name="assessment_fee" placeholder="Enter fee if available">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleEditAssessmentFee(value) {
+        const assessmentFeeField = document.getElementById('edit-assessmentFeeField');
+        if (value === "1") {
+            assessmentFeeField.style.display = "block";
+        } else {
+            assessmentFeeField.style.display = "none";
+        }
+    }
+
+    // Populate the Edit Modal with course data
+    document.querySelectorAll('.edit-course-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            const tesdaLevel = this.getAttribute('data-tesda_level');
+            const durationDays = this.getAttribute('data-duration_days');
+            const fee = this.getAttribute('data-fee');
+            const assessment = this.getAttribute('data-assessment');
+            const assessmentFee = this.getAttribute('data-assessment_fee');
+
+            // Populate modal fields
+            document.getElementById('edit-course-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-tesda_level').value = tesdaLevel;
+            document.getElementById('edit-duration_days').value = durationDays;
+            document.getElementById('edit-training_fee').value = fee;
+            document.getElementById('edit-assessment').value = assessment;
+            toggleEditAssessmentFee(assessment);
+            document.getElementById('edit-assessment_fee').value = assessmentFee || '';
+        });
+    });
+</script>

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+Enrollments - Admin Panel
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-white shadow-sm p-2 rounded">
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('dashboard.index') }}" class="text-decoration-none">
+                <i class="fas fa-home"></i> Go to Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Enrollments
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Enrollments</h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEnrollmentModal">
+            <i class="fas fa-plus"></i> Add New Enrollment
+        </button>
+    </div>
+
+    <!-- Enrollments Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Enrollment Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if enrollments %}
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ enrollment.student.first_name }} {{ enrollment.student.last_name }}</td>
+                        <td>{{ enrollment.course.name }}</td>
+                        <td>{{ enrollment.status }}</td>
+                        <td>{{ enrollment.enrollment_date.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No enrollments found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Include Create Enrollment Modal -->
+{% include "enrollments/create.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/multistepform.js') }}"></script>
+<script src="{{ url_for('static', filename='js/location.js') }}"></script>
+{% endblock %}

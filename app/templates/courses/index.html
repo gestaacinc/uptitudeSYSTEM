@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}
+Courses - Admin Panel
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-white shadow-sm p-2 rounded">
+        <li class="breadcrumb-item">
+            <a href="{{ url_for('dashboard.index') }}" class="text-decoration-none">
+                <i class="fas fa-home"></i> Go to Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            Courses
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Courses</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        {% if category == "course" %}
+        <div id="flash-messages" class="alert alert-{{ category }} text-center">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endwith %}
+
+
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCourseModal">
+            <i class="fas fa-plus"></i> Add New Course
+        </button>
+    </div>
+
+    <!-- Courses Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>TESDA Level</th>
+                        <th>Duration (Days)</th>
+                        <th>Fee</th>
+                        <th>In-House Assessment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if courses.items %}
+                    {% for course in courses.items %}
+                    <tr>
+                        <td>{{ loop.index + (courses.page - 1) * courses.per_page }}</td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.tesda_level }}</td>
+                        <td>{{ course.duration_days }}</td>
+                        <td>₱{{ "{:.2f}".format(course.fee) }}</td>
+                        <td>
+                            {% if course.assessment %}
+                            <span class="badge bg-success clickable" data-assessment-fee="{{ "
+                                {:.2f}".format(course.assessment_fee) }}">
+                                Yes
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-warning edit-course-btn" data-bs-toggle="modal"
+                                data-bs-target="#editCourseModal" data-id="{{ course.id }}"
+                                data-name="{{ course.name }}" data-tesda_level="{{ course.tesda_level }}"
+                                data-duration_days="{{ course.duration_days }}" data-fee="{{ course.fee }}"
+                                data-assessment="{{ '1' if course.assessment else '0' }}"
+                                data-assessment_fee="{{ course.assessment_fee }}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+
+                            <button class="btn btn-sm btn-secondary archive-course-btn" data-id="{{ course.id }}">
+                                <i class="fas fa-archive"></i> Archive
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No courses added in this section yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Pagination Controls -->
+    <div class="mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if courses.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('courses.index', page=courses.prev_num) }}"
+                        aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for page_num in courses.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                {% if page_num %}
+                {% if page_num == courses.page %}
+                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('courses.index', page=page_num) }}">{{
+                        page_num }}</a></li>
+                {% endif %}
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if courses.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('courses.index', page=courses.next_num) }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Include Create Course Modal -->
+{% include "courses/create.html" %}
+<!-- Include Edit Course Modal -->
+{% include "courses/edit.html" %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.clickable').forEach(function (element) {
+            element.addEventListener('click', function () {
+                const fee = this.getAttribute('data-assessment-fee');
+                Swal.fire({
+                    title: 'Assessment Fee',
+                    text: `The assessment fee for this course is ₱${fee}.`,
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                });
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.archive-course-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const courseId = this.getAttribute('data-id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will archive the course and it will no longer be displayed.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, archive it!',
+                    cancelButtonText: 'Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/courses/archive/${courseId}`, {
+                            method: 'POST',
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    Swal.fire(
+                                        'Archived!',
+                                        'The course has been archived.',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Error!',
+                                        'An error occurred while archiving the course.',
+                                        'error'
+                                    );
+                                }
+                            });
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+{% endblock %}

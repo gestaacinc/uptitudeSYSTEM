@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        footer {
+            background-color: #4635B1;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            min-width: 260px;
+            background-color: #441752;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar .brand {
+            font-size: 24px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .sidebar .nav-link {
+            display: flex;
+            /* Align items horizontally */
+            align-items: center;
+            /* Vertically center items */
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            text-decoration: none;
+            /* Remove underline */
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            /* Add spacing between the icon and the label */
+            font-size: 18px;
+            /* Ensure icons have consistent size */
+            width: 24px;
+            /* Set a fixed width to align all icons */
+            text-align: center;
+            /* Center align icons */
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #5d1f77;
+            border-radius: 4px;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #5d1f77;
+            color: #f8f9fa;
+            transition: 0.3s;
+        }
+
+        .sidebar .date-time {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* Content Styles */
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: right;
+            color: #441752;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div>
+                <div class="brand">
+                    <i class="fas fa-school"></i> Admin Panel
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('courses.index') }}">
+                            <i class="fas fa-book"></i> Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('enrollments.index') }}">
+                            <i class="fas fa-user-edit"></i> Enrollments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('payments.index') }}">
+                            <i class="fas fa-credit-card"></i> Payments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('documents.index') }}">
+                            <i class="fas fa-folder"></i> Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('users.index') }}">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('reports.index') }}">
+                            <i class="fas fa-chart-line"></i> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{{ url_for('index.index') }}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="date-time" id="dateTime"></div>
+        </nav>
+
+        <!-- Breadcrumb Section -->
+        <div class="content">
+            {% block breadcrumb %}
+            {% endblock %}
+
+            <!-- Page Content -->
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; {{ current_year }} School Management System. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function updateDateTime() {
+            const dateTimeElement = document.getElementById('dateTime');
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString();
+            const formattedTime = now.toLocaleTimeString();
+            dateTimeElement.innerHTML = `${formattedDate} ${formattedTime}`;
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+    </script>
+    <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+
+    <!-- Page-Specific Scripts -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+
+</html>

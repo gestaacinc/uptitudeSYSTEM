@@ -1,0 +1,110 @@
+<div class="modal fade" id="createEnrollmentModal" tabindex="-1" aria-labelledby="createEnrollmentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createEnrollmentModalLabel">New Enrollment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="multiStepForm">
+                <div class="modal-body">
+                    <!-- Step Indicators -->
+                    <div class="progress mb-4">
+                        <div id="progressBar" class="progress-bar" role="progressbar" style="width: 33%;">Step 1</div>
+                    </div>
+
+                    <!-- Step 1: Student Information -->
+                    <div class="step" id="step-1">
+                        <h5 class="mb-4">Step 1: Student Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contact_number" class="form-label">Contact Number</label>
+                                <input type="text" class="form-control" id="contact_number" name="contact_number"
+                                    required>
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4 mb-3">Address</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="house_number" class="form-label">House Number</label>
+                                <input type="text" class="form-control" id="house_number" name="house_number">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="street_address" class="form-label">Street Address</label>
+                                <input type="text" class="form-control" id="street_address" name="street_address">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="country" class="form-label">Country</label>
+                                <select id="country" class="form-control">
+                                    <option value="">Select Country</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="region-container" style="display: none;">
+                                <label for="region" class="form-label">Region</label>
+                                <select id="region" class="form-control">
+                                    <option value="">Select Region</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6" id="municipality-container" style="display: none;">
+                                <label for="municipality" class="form-label">Province/Municipality</label>
+                                <select id="municipality" class="form-control">
+                                    <option value="">Select Province/Municipality</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="barangay-container" style="display: none;">
+                                <label for="barangay" class="form-label">Barangay</label>
+                                <select id="barangay" class="form-control">
+                                    <option value="">Select Barangay</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="next-step-1">Next</button>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Step 3: Enrollment Confirmation -->
+                    <div class="step d-none" id="step-3">
+                        <h5>Step 3: Confirm Enrollment</h5>
+                        <p>Please review the information before submitting:</p>
+                        <ul>
+                            <li><strong>Student Name:</strong> <span id="reviewStudentName"></span></li>
+                            <li><strong>Contact Number:</strong> <span id="reviewContactNumber"></span></li>
+                            <li><strong>Course:</strong> <span id="reviewCourse"></span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary d-none" id="prevBtn">Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextBtn">Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

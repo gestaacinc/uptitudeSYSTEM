@@ -1,0 +1,279 @@
+<div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="createCourseModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCourseModalLabel">Add New Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('courses.create') }}" method="POST">
+                <div class="modal-body">
+                    <!-- Course Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Course Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <small id="nameError" class="text-danger" style="display: none;">This course name already
+                            exists.</small>
+                    </div>
+
+
+                    <!-- TESDA Qualification -->
+                    <div class="mb-3">
+                        <label for="tesda_level" class="form-label">TESDA Qualification</label>
+                        <select class="form-select" id="tesda_level" name="tesda_level" required>
+                            <option value="">Select a Qualification</option>
+                            <option value="NC I">NC I</option>
+                            <option value="NC II">NC II</option>
+                            <option value="NC III">NC III</option>
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-3">
+                        <label for="duration_days" class="form-label">Duration (Days)</label>
+                        <input type="number" class="form-control" id="duration_days" name="duration_days" required>
+                    </div>
+
+                    <!-- Training Fee -->
+                    <div class="mb-3">
+                        <label for="training_fee" class="form-label">Training Fee</label>
+                        <input type="text" class="form-control" id="training_fee" name="training_fee" required>
+                        <small id="trainingFeeError" class="text-danger" style="display: none;">Training fee should not
+                            exceed 5 digits
+                            (maximum ₱99,999).</small>
+                    </div>
+
+
+                    <!-- In-House Assessment -->
+                    <div class="mb-3">
+                        <label for="assessment" class="form-label">Available for In-House Assessment?</label>
+                        <select class="form-select" id="assessment" name="assessment" required
+                            onchange="toggleAssessmentFeeField(this.value)">
+                            <option value="" selected>No Selection</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="assessmentFeeField" style="display: none;">
+                        <label for="assessment_fee" class="form-label">Assessment Fee</label>
+                        <input type="number" step="0.01" class="form-control" id="assessment_fee" name="assessment_fee"
+                            placeholder="Enter fee if available">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" disabled>Add Course</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- TRIGGERING THE ASSESSMENT FEE INPUT -->
+<script>
+    function toggleAssessmentFeeField(value) {
+        const assessmentFeeField = document.getElementById('assessmentFeeField');
+        if (value === "1") {
+            assessmentFeeField.style.display = "block";
+        } else {
+            assessmentFeeField.style.display = "none";
+        }
+    }
+</script>
+<!-- VALIDATION OF TRAINING FEE -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const trainingFeeInput = document.getElementById("training_fee");
+        const trainingFeeError = document.getElementById("trainingFeeError");
+
+        trainingFeeInput.addEventListener("input", function () {
+            // Remove non-numeric characters except for the decimal point
+            let value = this.value.replace(/,/g, "").replace(/[^0-9.]/g, "");
+
+            // Ensure only one decimal point is present
+            if ((value.match(/\./g) || []).length > 1) {
+                value = value.substring(0, value.length - 1);
+            }
+
+            // Format the number with commas
+            if (value) {
+                const parts = value.split(".");
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                this.value = parts.join(".");
+            } else {
+                this.value = ""; // Clear input if the value is invalid
+            }
+
+            // Check if the value exceeds 5 digits
+            const numericValue = parseFloat(value.replace(/,/g, ""));
+            if (numericValue > 99999) {
+                trainingFeeError.style.display = "block";
+                this.classList.add("is-invalid"); // Add Bootstrap's invalid class for red border
+            } else {
+                trainingFeeError.style.display = "none";
+                this.classList.remove("is-invalid");
+            }
+        });
+
+        // On form submission, remove commas for raw numeric value and validate the limit
+        trainingFeeInput.closest("form").addEventListener("submit", function (e) {
+            const numericValue = parseFloat(trainingFeeInput.value.replace(/,/g, ""));
+            if (numericValue > 99999) {
+                e.preventDefault(); // Prevent form submission
+                trainingFeeError.style.display = "block";
+                trainingFeeInput.classList.add("is-invalid");
+                return false;
+            }
+            trainingFeeInput.value = trainingFeeInput.value.replace(/,/g, ""); // Remove commas for submission
+        });
+    });
+</script>
+<!-- VALIDATION OF COURSE NAME -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const nameInput = document.getElementById("name");
+        const nameError = document.getElementById("nameError");
+
+        nameInput.addEventListener("blur", function () {
+            const courseName = nameInput.value.trim();
+
+            if (courseName) {
+                fetch(`/courses/validate-name`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name: courseName }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.error) {
+                            nameError.textContent = data.error;
+                            nameError.style.display = "block";
+                            nameInput.classList.add("is-invalid");
+                        } else {
+                            nameError.style.display = "none";
+                            nameInput.classList.remove("is-invalid");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error validating course name:", error);
+                    });
+            }
+        });
+    });
+</script>
+<!-- VALIDATION OR COURSENAME -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const nameInput = document.getElementById("name");
+        const tesdaLevelInput = document.getElementById("tesda_level");
+        const durationInput = document.getElementById("duration_days");
+        const trainingFeeInput = document.getElementById("training_fee");
+        const assessmentInput = document.getElementById("assessment");
+        const assessmentFeeInput = document.getElementById("assessment_fee");
+        const addButton = document.querySelector(".btn-primary[type='submit']");
+        const nameError = document.getElementById("nameError");
+        const trainingFeeError = document.getElementById("trainingFeeError");
+
+        // Function to validate the form
+        function validateForm() {
+            let isValid = true;
+
+            // Check course name
+            if (nameInput.value.trim() === "" || nameInput.classList.contains("is-invalid")) {
+                isValid = false;
+            }
+
+            // Check TESDA Qualification
+            if (tesdaLevelInput.value === "") {
+                isValid = false;
+            }
+
+            // Check Duration
+            if (durationInput.value.trim() === "" || isNaN(durationInput.value) || parseInt(durationInput.value) <= 0) {
+                isValid = false;
+            }
+
+            // Check Training Fee
+            if (
+                trainingFeeInput.value.trim() === "" ||
+                trainingFeeInput.classList.contains("is-invalid") ||
+                parseFloat(trainingFeeInput.value.replace(/,/g, "")) > 99999
+            ) {
+                isValid = false;
+            }
+
+            // Check Assessment Fee if Assessment is selected
+            if (assessmentInput.value === "1" && (!assessmentFeeInput.value || parseFloat(assessmentFeeInput.value) <= 0)) {
+                isValid = false;
+            }
+
+            // Enable/Disable the Add Course button
+            addButton.disabled = !isValid;
+        }
+
+        // Event listeners for input changes
+        nameInput.addEventListener("input", validateForm);
+        tesdaLevelInput.addEventListener("change", validateForm);
+        durationInput.addEventListener("input", validateForm);
+        trainingFeeInput.addEventListener("input", validateForm);
+        assessmentInput.addEventListener("change", validateForm);
+        assessmentFeeInput.addEventListener("input", validateForm);
+
+        // Validate form initially
+        validateForm();
+
+        // Validation for name with server request
+        nameInput.addEventListener("blur", function () {
+            const courseName = nameInput.value.trim();
+
+            if (!courseName) {
+                nameError.textContent = "Course name cannot be empty.";
+                nameError.style.display = "block";
+                nameInput.classList.add("is-invalid");
+                validateForm();
+                return;
+            }
+
+            nameError.style.display = "none";
+            nameInput.classList.remove("is-invalid");
+
+            fetch("/courses/validate-name", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: courseName }),
+            })
+                .then((response) => {
+                    if (!response.ok && response.status === 400) {
+                        return response.json().then((data) => {
+                            throw new Error(data.error);
+                        });
+                    }
+                    if (!response.ok) {
+                        throw new Error("Unexpected error");
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    nameError.style.display = "none";
+                    nameInput.classList.remove("is-invalid");
+                    validateForm();
+                })
+                .catch((error) => {
+                    if (error.message.startsWith("The course")) {
+                        nameError.textContent = error.message;
+                        nameError.style.display = "block";
+                        nameInput.classList.add("is-invalid");
+                        validateForm();
+                    } else {
+                        console.error("Unexpected error:", error.message);
+                    }
+                });
+        });
+    });
+</script>
